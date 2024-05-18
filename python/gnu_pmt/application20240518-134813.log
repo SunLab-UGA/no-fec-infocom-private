@@ -1,0 +1,8 @@
+2024-05-18 13:48:13 - Agent started with args=Namespace(whoami='client1', action='train', time=None, seed=0)
+2024-05-18 13:48:13 - Random seed set to 0
+2024-05-18 13:48:18 - std_out='MAPPER: encoding: 2\nchunks_to_symbols :info: set_min_output_buffer on block 10 to 207744\nfft_v_fftw :info: set_min_output_buffer on block 12 to 2077440\nofdm_cyclic_prefixer :info: set_min_output_buffer on block 14 to 2077440\nofdm_carrier_allocator_cvc :info: set_min_output_buffer on block 15 to 207744\nchunks_to_symbols :info: set_min_output_buffer on block 16 to 415488\ntagged_stream_mux :info: set_min_output_buffer on block 17 to 207744\nfoo_packet_pad2 :info: set_min_output_buffer on block 32 to 100000\nmultiply_const_cc :info: set_min_output_buffer on block 33 to 100000\nPress Enter to quit: usrp_source :error: In the last 1750 ms, 1 overflows occurred.\n'
+2024-05-18 13:48:18 - err_out="[INFO] [UHD] linux; GNU C++ version 12.3.0; Boost_108200; UHD_4.6.0.HEAD-release\n[INFO] [B200] Detected Device: B200mini\n[INFO] [B200] Operating over USB 3.\n[INFO] [B200] Initialize CODEC control...\n[INFO] [B200] Initialize Radio control...\n[INFO] [B200] Performing register loopback test... \n[INFO] [B200] Register loopback test passed\n[INFO] [B200] Setting master clock rate selection to 'automatic'.\n[INFO] [B200] Asking for clock rate 16.000000 MHz... \n[INFO] [B200] Actually got clock rate 16.000000 MHz.\n[INFO] [B200] Asking for clock rate 40.000000 MHz... \n[INFO] [B200] Actually got clock rate 40.000000 MHz.\nOOO"
+2024-05-18 13:48:18 - Subprocess terminated
+2024-05-18 13:48:18 - Training model...
+2024-05-18 13:55:15 - Subprocess cannot be stopped, was not running
+2024-05-18 13:55:15 - end of program
