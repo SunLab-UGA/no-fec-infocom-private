@@ -77,7 +77,7 @@ logging.info(f'RX_POLL_TIMEOUT: {RX_POLL_TIMEOUT}')
 
 # print the number of packets to transmit rounded up
 floats_per_packet = 375 # max1500 bytes@bpsk, 4 bytes per float
-floats_per_packet = 750 # max1500 bytes@qpsk, 4 bytes per float ? forgot why...
+# floats_per_packet = 750 # max1500 bytes@qpsk, 4 bytes per float ? forgot why...
 num_packets = int(np.ceil(len(flattened_parameters) / floats_per_packet))
 logging.info(f'floats_per_packet: {floats_per_packet}')
 logging.info(f'num_packets per model tx: {num_packets}')
