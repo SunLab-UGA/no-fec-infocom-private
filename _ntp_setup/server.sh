@@ -16,7 +16,7 @@ sudo cp /etc/ntp.conf /etc/ntp.conf.bak  # Backup the original config file
 
 # Append local server configuration (adjust the network as needed)
 # echo "restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap" | sudo tee -a /etc/ntp.conf
-echo "broadcast 192.168.1.255" | sudo tee -a /etc/ntp.conf  # Adjust broadcast address if necessary
+echo "broadcast $MY_IP" | sudo tee -a /etc/ntp.conf  # Adjust broadcast address if necessary
 
 # Restart NTP server to apply changes
 sudo service ntp restart
