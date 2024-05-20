@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # IP of the NTP server
-NTP_SERVER_IP="192.168.137.255"  # Change this to your server's IP address
+NTP_SERVER_IP="192.168.137.14"  # Change this to your server's IP address
 
 # Install NTP
 sudo apt-get update && sudo apt-get install -y ntp
