@@ -7,6 +7,8 @@ import numpy as np
 from typing import List
 import logging
 
+from preamble_seq import generate_floats_from_bits, check_preamble
+
 VERBOSE = False # print debug messages
 
 class transceiver:
@@ -158,16 +160,29 @@ class transceiver:
                                  floats_per_packet:int = 375,
                                  send_times:int = 10, # send multiple times
                                  interval = 4, # interval between sends (ms)
-                                 UTC_ms:int = None # send @ a specific timestamp, if None send now
+                                 UTC_ms:int = None, # send @ a specific timestamp, if None send now
+                                 prefix:int = 10, # send a fixed number of packets before the model
         ) -> None:
         '''transmit a model as a flattened numpy array'''
-
-        num_packets = int(np.ceil(len(flattened_parameters) / floats_per_packet))
-        pkts = np.zeros((num_packets, floats_per_packet))
+        prefix_length = prefix*floats_per_packet # entire packet of the prefix sequence
+        num_packets = int(np.ceil(len(flattened_parameters) / floats_per_packet)) # model packets
+        pkts = np.zeros((num_packets+prefix_length, floats_per_packet)) # total packets with prefix
+        # prefix
+        prefixes = generate_floats_from_bits(0, prefix) # generate the prefix sequence
+        prefixes = np.tile(prefixes, floats_per_packet//prefix) # extend the prefix sequence to cover an entire packet
+        for i in range(prefix):
+            pkts[i, :] = [i]*prefixes[i] # send a fixed number of packets before the model, sync
+        # model
         for i in range(num_packets):
-            pkts[i, :len(flattened_parameters[i*floats_per_packet:(i+1)*floats_per_packet])] = \
-                flattened_parameters[i*floats_per_packet:(i+1)*floats_per_packet]
-        extended_pkts = np.tile(pkts, (send_times, 1))
+            start = i*floats_per_packet
+            end = (i+1)*floats_per_packet
+            pkts[i+prefix, :len(flattened_parameters[start:end])] = flattened_parameters[start:end]
+
+            # pkts[i, :len(flattened_parameters[i*floats_per_packet:(i+1)*floats_per_packet])] = \
+            #     flattened_parameters[i*floats_per_packet:(i+1)*floats_per_packet]
+        extended_pkts = np.tile(pkts, (send_times, 1)) # repeat the packets to send multiple times
+        # note: the prefix is sent before the model each time
+
         try:
             # transmit the packets
             if UTC_ms is None:
@@ -213,6 +228,7 @@ class transceiver:
         try:
             pkt = pkt.view(np.float32)
             pkt = np.nan_to_num(pkt) # convert any nan to zeros
+            # insert function to clamp values to a range!!
         except Exception as e:
             logging.info(f'pkt: {pkt}')
             print(f'pkt: {pkt}')
@@ -230,13 +246,14 @@ class transceiver:
                       parameter_size:int = 431080, # size of the parameters in model
                       packets:int = 1150, # number of packets to receive
                       packet_repeat:int = 10, # number of times to receive the packets
-                      floats_per_packet:int = 1528 # number of floats per packet (BPSK) NEED UPDATE!!
+                      floats_per_packet:int = 1528, # number of floats per packet (BPSK) NEED UPDATE!!
+                      prefix:int = 10, # number of packets to sync rx_seq 
         ) -> np.ndarray | None: # return a numpy array or None
         '''receive a model as a flattened numpy array'''
-        total_packets = packets * packet_repeat
+        total_packets = packets * packet_repeat # model packets
         rx_pkt = [] # keep the received packets
         rx_seq = [] ; seq_num=0 # keep the sequence numbers (separate from the packets)
-        for packet in range(total_packets):
+        for packet in range(total_packets+prefix):
             additional_data, data = self.receive_floats(timeout=poll_timeout)
             if data is None:
                 rx_pkt.append(None)
@@ -251,7 +268,39 @@ class transceiver:
                 else: # assume a valid packet
                     rx_pkt.append(data)
                     rx_seq.append(seq_num) ; seq_num += 1 # assign seq num
-        
+
+        # align the packets to the correct sequence (inspect the first len(rx_seq)=prefix packets)
+        pramble_seq = generate_floats_from_bits(0, prefix)
+        preamble_index = None
+        for i in range(prefix):
+            if type(rx_seq[i]) == int: # valid packet
+                # parse the packet
+                checkme = self._parse_rx_pkt(rx_pkt[i])
+                # check if the preamble sequence is present in the packet, if so return the index
+                preamble_index = check_preamble(pramble_seq, checkme)
+                if preamble_index is not None:
+                    offset = i - preamble_index # number to add to the front to align the seq numbers
+                    break # found a valid index preamble to adjust the sequence
+        if preamble_index == None:
+            return None # we didn't find any sequence numbers in any prefix packets!
+        else:
+            # adjust the seq numbers based on the preamble index
+            if offset < 0: # sanity check
+                raise ValueError("packet offset sync was negative")
+            rx_seq = ["None"] * offset + rx_seq
+            rx_pkt = [None] * offset + rx_pkt
+
+        # remove the preamble from each retransmit so we don't check them for integrity
+        seq_removed_preambles = []
+        pkt_removed_preambles = []
+        for ii in range(0,len(rx_seq), prefix + total_packets):
+            data_start_index = i + prefix
+            data_end_index = data_start_index + total_packets
+            seq_removed_preambles.extend(rx_seq[data_start_index:data_end_index])
+            pkt_removed_preambles.extend(rx_pkt[data_start_index:data_end_index])
+        # dirty rewrite
+        rx_seq = seq_removed_preambles ; rx_pkt = pkt_removed_preambles
+
         # check for any missing packets
         dropped_packets_indexes, success_packets_indexes = \
                     self._compare_string_indices_divided(rx_seq, packet_repeat)
