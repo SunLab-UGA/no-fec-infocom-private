@@ -124,7 +124,7 @@ class Agent: # this can be a client_agent or a server_agent
         # get the flattened model
         flat = self.client.get_flattened_parameters()
         self.txrx.transmit_flattened_model(flattened_parameters=flat)
-    def receive(self, who_tx: str): # ==================================receive (BLOCKING!)
+    def receive(self, who_tx: str = None): # ==================================receive (BLOCKING!)
         """ receive the model from the client """
         # check if the transceiver is running
         if not self.transceiver_running:
@@ -161,8 +161,9 @@ class Agent: # this can be a client_agent or a server_agent
                 pass
             return action()
     # ============================================================================= server functions (server_agent)
-    def init_server(self): # ==================================init_server
-        """ initialize the server """
+    def federate(self): # ==================================init_server
+        """ federate the models from the clients """
+        # initialize the server
         self.server_model = MnistServer(self.model)
 
 # ============================================================================= END agent
@@ -170,7 +171,8 @@ class Agent: # this can be a client_agent or a server_agent
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Client or server agent')
     parser.add_argument('whoami', type=str, help='client0, client1, or server')
-    parser.add_argument('action', type=str, help='train, transmit, or receive')
+    parser.add_argument('action', type=str, help='train, transmit, receive, federate') # federate is for the server
+    parser.add_argument('--from_who', type=str, help='receive from [client0, client1]', default=None) # only for server
     parser.add_argument('--time', type=int, help='time to transmit or receive')
     parser.add_argument('--seed', type=int, help='random seed', default=0)
     args = parser.parse_args()
@@ -186,6 +188,9 @@ if __name__ == '__main__':
 
     np.random.seed(args.seed)
     logging.info(f'Random seed set to {args.seed}')
+
+    # get the time and perform the delay and rounding to the nearest second
+    
 
     agent = Agent(seed=args.seed)
     agent.set_whoami(args.whoami)
@@ -225,8 +230,12 @@ if __name__ == '__main__':
         if args.time:
             agent.txrx_at_time(args.time, agent.transmit)
     elif args.action == 'receive':
-        if args.time:
-            agent.txrx_at_time(args.time, agent.receive)
+        if args.from_who is None:
+            if args.time:
+                agent.txrx_at_time(args.time, agent.receive)
+        else: # only for server
+            if args.time:
+                agent.txrx_at_time(args.time, lambda: agent.receive(who_tx=args.from_who))
     elif args.action == 'federate':
         pass # federate the models, check if server
     else:
