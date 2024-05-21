@@ -170,8 +170,8 @@ class Agent: # this can be a client_agent or a server_agent
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Client or server agent')
-    parser.add_argument('whoami', type=str, help='client0, client1, or server')
-    parser.add_argument('action', type=str, help='train, transmit, receive, federate') # federate is for the server
+    parser.add_argument('--whoami', type=str, help='client0, client1, or server')
+    parser.add_argument('--action', type=str, help='train, transmit, receive, federate') # federate is for the server
     parser.add_argument('--from_who', type=str, help='receive from [client0, client1]', default=None) # only for server
     parser.add_argument('--time', type=int, help='time to transmit or receive')
     parser.add_argument('--seed', type=int, help='random seed', default=0)
@@ -186,13 +186,13 @@ if __name__ == '__main__':
                     level=logging.INFO)
     logging.info(f'Agent started with {args=}')
 
-    np.random.seed(args.seed)
+    np.random.seed(int(args.seed))
     logging.info(f'Random seed set to {args.seed}')
 
     # get the time and perform the delay and rounding to the nearest second
     
 
-    agent = Agent(seed=args.seed)
+    agent = Agent(seed=int(args.seed))
     agent.set_whoami(args.whoami)
     print(f'{agent.whoami=}')
 
