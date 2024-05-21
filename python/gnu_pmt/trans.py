@@ -156,7 +156,7 @@ class transceiver:
         return seq_num
     
     def transmit_flattened_model(self, 
-                                 flattened_parameters:np.ndarray,
+                                 flattened_parameters:np.ndarray, #4
                                  floats_per_packet:int = 375,
                                  send_times:int = 10, # send multiple times
                                  interval = 4, # interval between sends (ms)
@@ -164,6 +164,10 @@ class transceiver:
                                  prefix:int = 10, # send a fixed number of packets before the model
         ) -> None:
         '''transmit a model as a flattened numpy array'''
+        logging.info(f"flattened_parameters shape: {flattened_parameters.shape}")
+        if flattened_parameters.dtype != np.float32:
+            logging.error("ERROR: flattened_parameters is not 32-bit float!")
+            return 
         prefix_length = prefix*floats_per_packet # entire packet of the prefix sequence
         num_packets = int(np.ceil(len(flattened_parameters) / floats_per_packet)) # model packets
         logging.info(f"num_packets: {num_packets}")
@@ -171,7 +175,7 @@ class transceiver:
         logging.info(f"pkts shape: {pkts.shape}")
         # ---prefix
         prefixes:np.array = generate_floats_from_bits_np(0, prefix) # generate the prefix sequence -> np.array-32bit
-        prefixes = np.tile(prefixes, floats_per_packet//prefix) # extend(repeat) the prefix sequence to cover an entire packet shape(10,375)
+        prefixes = np.tile(prefixes, (floats_per_packet//prefix, 1)).T # extend(repeat) the prefix sequence to cover an entire packet shape(10,375)
         logging.info(f"prefixes shape: {prefixes.shape}")
         for i in range(prefix):
             pkts[i, :] = prefixes
