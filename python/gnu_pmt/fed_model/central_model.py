@@ -26,7 +26,7 @@ class MnistModel(torch.nn.Module):
     
 # ============================================================================= load_data
 def load_data(seed=0, batch_size=32, 
-              data_dir='./data',
+              data_dir='data',
               verbose=False):
     '''Load the MNIST dataset'''
     torch.manual_seed(seed)

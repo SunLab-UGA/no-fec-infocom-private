@@ -1,0 +1,41 @@
+build/install
+cd no-fec-infocom-private/gr-ieee802-11-maint-3.10_NO-FEC
+./buildinstall.sh
+
+
+"ssh all 3" [arp -a]
+ssh sunlab-830
+ssh sunlab-831
+ssh sunlab-832
+
+cd ~/no-fec-infocom-private/python/gnu_pmt
+conda activate nofec
+(OR conda activate no_fec)
+
+python agent.py [client0,client1,server] [train,transmit,receive,federate]
+
+ex
+python agent.py client1 train
+
+(undo any git changes) first checks, second files/directories
+git restore .
+git restore --source HEAD --staged --worktree .
+
+git clean -n
+git clean -fd
+
+FORCE GIT FROM REMOTE
+git fetch origin
+git reset --hard origin/main
+git clean -fd
+
+
+COMPILE
+
+
+GIT (can always use git status)
+
+git clone git@github.com:SunLab-UGA/no-fec-infocom-private.git
+git add --all
+git commit -m "#"
+git push
