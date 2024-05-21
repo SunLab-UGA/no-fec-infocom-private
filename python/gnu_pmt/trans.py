@@ -7,7 +7,7 @@ import numpy as np
 from typing import List
 import logging
 
-from preamble_seq import generate_floats_from_bits, check_preamble
+from preamble_seq import generate_floats_from_bits_np, check_preamble
 
 VERBOSE = False # print debug messages
 
@@ -166,13 +166,14 @@ class transceiver:
         '''transmit a model as a flattened numpy array'''
         prefix_length = prefix*floats_per_packet # entire packet of the prefix sequence
         num_packets = int(np.ceil(len(flattened_parameters) / floats_per_packet)) # model packets
-        pkts = np.zeros((num_packets+prefix_length, floats_per_packet)) # total packets with prefix
-        # prefix
-        prefixes = generate_floats_from_bits(0, prefix) # generate the prefix sequence
-        prefixes = np.tile(prefixes, floats_per_packet//prefix) # extend the prefix sequence to cover an entire packet
-        for i in range(prefix):
-            pkts[i, :] = [i]*prefixes[i] # send a fixed number of packets before the model, sync
-        # model
+        pkts = np.zeros((num_packets+prefix_length, floats_per_packet),dtype=np.float32) # total packets with prefix
+        # ---prefix
+        prefixes:np.array = generate_floats_from_bits_np(0, prefix) # generate the prefix sequence -> np.array-32bit
+        prefixes = np.tile(prefixes, floats_per_packet//prefix) # extend(repeat) the prefix sequence to cover an entire packet
+        pkts[:prefix, :] = prefixes # add the prefix to the packets
+        # for i in range(prefix):
+            # pkts[i, :] = [i]*prefixes[i] # send a fixed number of packets before the model, sync
+        # ---model
         for i in range(num_packets):
             start = i*floats_per_packet
             end = (i+1)*floats_per_packet

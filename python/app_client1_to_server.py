@@ -39,11 +39,11 @@ if __name__ == "__main__":
                                   'from_who':'client1'})
     
 
-    # t1.start()
-    t2.start()
+    t1.start()
+    # t2.start()
 
-    # t1.join()
-    t2.join()
+    t1.join()
+    # t2.join()
 
     print("All threads finished")
     

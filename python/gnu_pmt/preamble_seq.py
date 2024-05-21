@@ -8,6 +8,14 @@ def generate_floats_from_bits(start:int, count:int) -> list:
         floats.append(struct.unpack('f', struct.pack('<I', i))[0])
     return floats
 
+def generate_floats_from_bits_np(start:int, count:int) -> np.array:
+    '''generate a predefined bitwise sequence of floats starting from a given integer'''
+    floats = np.zeros(count-start, dtype=np.float32)
+    for i in range(start, start + count):
+        # Pack the integer as a 32-bit unsigned integer, then unpack it as a float
+        floats[i-start] = struct.unpack('f', struct.pack('<I', i))[0]
+    return floats
+
 def check_preamble(sequence:np.array, packet:np.array, valid_limit:int=10) -> int|None:
     '''check if a preamble sequence is present in an array of recievied floats
     if the preamble packet contains X valid limit of a float in the sequence, 
