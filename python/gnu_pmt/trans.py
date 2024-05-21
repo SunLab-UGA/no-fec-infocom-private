@@ -166,10 +166,13 @@ class transceiver:
         '''transmit a model as a flattened numpy array'''
         prefix_length = prefix*floats_per_packet # entire packet of the prefix sequence
         num_packets = int(np.ceil(len(flattened_parameters) / floats_per_packet)) # model packets
+        logging.info(f"num_packets: {num_packets}")
         pkts = np.zeros((num_packets+prefix_length, floats_per_packet),dtype=np.float32) # total packets with prefix
+        logging.info(f"pkts shape: {pkts.shape}")
         # ---prefix
         prefixes:np.array = generate_floats_from_bits_np(0, prefix) # generate the prefix sequence -> np.array-32bit
         prefixes = np.tile(prefixes, floats_per_packet//prefix) # extend(repeat) the prefix sequence to cover an entire packet shape(10,375)
+        logging.info(f"prefixes shape: {prefixes.shape}")
         for i in range(prefix):
             pkts[i, :] = prefixes
         # pkts[:prefix, :] = prefixes # add the prefix to the packets
