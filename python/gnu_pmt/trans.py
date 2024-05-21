@@ -169,8 +169,10 @@ class transceiver:
         pkts = np.zeros((num_packets+prefix_length, floats_per_packet),dtype=np.float32) # total packets with prefix
         # ---prefix
         prefixes:np.array = generate_floats_from_bits_np(0, prefix) # generate the prefix sequence -> np.array-32bit
-        prefixes = np.tile(prefixes, floats_per_packet//prefix) # extend(repeat) the prefix sequence to cover an entire packet
-        pkts[:prefix, :] = prefixes # add the prefix to the packets
+        prefixes = np.tile(prefixes, floats_per_packet//prefix) # extend(repeat) the prefix sequence to cover an entire packet shape(10,375)
+        for i in range(prefix):
+            pkts[i, :] = prefixes
+        # pkts[:prefix, :] = prefixes # add the prefix to the packets
         # for i in range(prefix):
             # pkts[i, :] = [i]*prefixes[i] # send a fixed number of packets before the model, sync
         # ---model
