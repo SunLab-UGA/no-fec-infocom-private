@@ -251,8 +251,15 @@ if __name__ == '__main__':
     # temporary testing
     # agent.stop_subprocess()
     # print(f'{agent.check_subprocess()=}')
-    print(f'{agent.check_subprocess()=}')
-    print(f'{agent.subprocess_running=}')
+    
+    # start the transceiver
+    if args.action == 'transmit' or args.action == 'receive':
+        if not agent.subprocess_running:
+            logging.error('Subprocess not running')
+            exit(1)
+            
+        agent.start_transceiver()
+        print(f'{agent.transceiver_running=}')
 
     if args.action == 'train':
         logging.info('Training model...')
@@ -263,8 +270,6 @@ if __name__ == '__main__':
     elif args.action == 'receive':
         if args.from_who is None:
             if args.time:
-                print(f'{agent.check_subprocess()=}')
-                print(f'{agent.subprocess_running=}')
                 agent.txrx_at_time(args.time, agent.receive)
         else: # only for server
             if args.time:
