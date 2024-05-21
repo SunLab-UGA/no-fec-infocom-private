@@ -263,6 +263,8 @@ if __name__ == '__main__':
     elif args.action == 'receive':
         if args.from_who is None:
             if args.time:
+                print(f'{agent.check_subprocess()=}')
+                print(f'{agent.subprocess_running=}')
                 agent.txrx_at_time(args.time, agent.receive)
         else: # only for server
             if args.time:
