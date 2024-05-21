@@ -48,7 +48,7 @@ if __name__ == "__main__":
     time_ms = int(time.time() * 1000)
     print("Time now (in ms):", time_ms)
     # add an offset to allow for loading the env starting the radio etc
-    time_ms += 5_000 # 5 seconds
+    time_ms += 7_000 # ms
 
     #831 = client1
     username = 'sunlab'

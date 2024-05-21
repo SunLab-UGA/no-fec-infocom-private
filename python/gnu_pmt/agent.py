@@ -249,8 +249,8 @@ if __name__ == '__main__':
     logging.info(f'{err_out=}')
 
     # temporary testing
-    agent.stop_subprocess()
-    print(f'{agent.check_subprocess()=}')
+    # agent.stop_subprocess()
+    # print(f'{agent.check_subprocess()=}')
 
     if args.action == 'train':
         logging.info('Training model...')
