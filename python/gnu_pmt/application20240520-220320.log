@@ -1,2 +1,0 @@
-2024-05-20 22:03:20 - Agent started with args=Namespace(whoami='client1', action='train', from_who=None, time=None, seed=0)
-2024-05-20 22:03:20 - Random seed set to 0
