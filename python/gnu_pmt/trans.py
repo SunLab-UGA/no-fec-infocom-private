@@ -175,19 +175,19 @@ class transceiver:
         logging.info(f"pkts shape: {pkts.shape}")
         # ---prefix
         prefixes:np.array = generate_floats_from_bits_np(0, prefix) # generate the prefix sequence -> np.array-32bit
-        prefixes = np.tile(prefixes, (floats_per_packet//prefix, 1)).T # extend(repeat) the prefix sequence to cover an entire packet shape(10,375)
-        logging.info(f"prefixes shape: {prefixes.shape}")
-        for i in range(prefix):
-            pkts[i, :] = prefixes
-        # pkts[:prefix, :] = prefixes # add the prefix to the packets
-        # for i in range(prefix):
-            # pkts[i, :] = [i]*prefixes[i] # send a fixed number of packets before the model, sync
+        for p in prefixes:
+            for ii in range(floats_per_packet):
+                pkts[ii, :] = p # fill the prefix packets with the prefix sequence
+        #log the first 10 packets
         # ---model
         for i in range(num_packets):
             start = i*floats_per_packet
             end = (i+1)*floats_per_packet
             pkts[i+prefix, :len(flattened_parameters[start:end])] = flattened_parameters[start:end]
-
+        logging.info(f"pkts[0]: {pkts[0]}") # log the first packet
+        logging.info(f"pkts[1]: {pkts[1]}") # log the second packet
+        logging.info(f"pkts[9]: {pkts[9]}") # log the third packet
+        logging.info(f"pkts[10]: {pkts[10]}") # log the first model packet
             # pkts[i, :len(flattened_parameters[i*floats_per_packet:(i+1)*floats_per_packet])] = \
             #     flattened_parameters[i*floats_per_packet:(i+1)*floats_per_packet]
         extended_pkts = np.tile(pkts, (send_times, 1)) # repeat the packets to send multiple times
