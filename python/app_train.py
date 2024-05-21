@@ -12,7 +12,6 @@
 
 import subprocess
 import threading
-import time
 
 def run_remote_script(username, hostname, password, conda_env, 
                       path, python_filename,  **kwargs):
@@ -44,12 +43,6 @@ def run_remote_script(username, hostname, password, conda_env,
             print("STDERR:", e.stderr)
 
 if __name__ == "__main__":
-    #get the int time in milliseconds
-    time_ms = int(time.time() * 1000)
-    print("Time now (in ms):", time_ms)
-    # add an offset to allow for loading the env starting the radio etc
-    time_ms += 5_000 # 5 seconds
-
     #831 = client1
     username = 'sunlab'
     hostname1 = 'sunlab-831'
@@ -59,7 +52,7 @@ if __name__ == "__main__":
     python_filename = 'agent.py'
     t1 = threading.Thread(target=run_remote_script, 
                           args=(username, hostname1, password, conda_env, path, python_filename), 
-                          kwargs={'whoami':'client1', 'action':'receive', 'time':time_ms})
+                          kwargs={'whoami':'client1', 'action':'train'})
     # run_remote_script(username=username, hostname=hostname1, password=password, conda_env=conda_env,
     #                   path=path, python_filename=python_filename,
     #                   whoami='client1', action='train')
@@ -72,7 +65,7 @@ if __name__ == "__main__":
     python_filename = 'agent.py'
     t2 = threading.Thread(target=run_remote_script, 
                           args=(username, hostname1, password, conda_env, path, python_filename), 
-                          kwargs={'whoami':'client0', 'action':'receive', 'time':time_ms})
+                          kwargs={'whoami':'client0', 'action':'train'})
     
     # run_remote_script(username=username, hostname=hostname1, password=password, conda_env=conda_env,
     #                   path=path, python_filename=python_filename,
