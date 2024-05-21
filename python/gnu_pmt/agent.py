@@ -132,6 +132,9 @@ class Agent: # this can be a client_agent or a server_agent
             raise ValueError('Transceiver is not running, start_subprocess()')
         # receive the model
         flat = self.txrx.receive_flattened_model()
+        if flat is None:
+            logging.error('No model received')
+            raise ValueError('No model received')
         self.client.set_flattened_parameters(flat)
         # save the model
         if self.whoami == 'client0' or self.whoami == 'client1':
@@ -257,7 +260,7 @@ if __name__ == '__main__':
         if not agent.subprocess_running:
             logging.error('Subprocess not running')
             exit(1)
-            
+
         agent.start_transceiver()
         print(f'{agent.transceiver_running=}')
 
