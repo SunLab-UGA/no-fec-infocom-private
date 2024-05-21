@@ -162,10 +162,38 @@ class Agent: # this can be a client_agent or a server_agent
             return action()
     # ============================================================================= server functions (server_agent)
     def federate(self): # ==================================init_server
-        """ federate the models from the clients """
-        # initialize the server
-        self.server_model = MnistServer(self.model)
-
+        """ federate the models from the clients. Assumes the models are already saved."""
+        logging.info('Federating models...')
+        # load the client models
+        clients:list[MnistClient] = []; client_weights = [] # list of clients and their flattened_weights
+        newest_model0 = max(glob.iglob(f'client0_*.pth'), key=os.path.getctime)
+        newest_model1 = max(glob.iglob(f'client1_*.pth'), key=os.path.getctime)
+        for i, model in enumerate([newest_model0, newest_model1]):
+            if not model:
+                raise ValueError(f'model{i} not found')
+            logging.info(f'loading model {model}')
+            client = MnistClient(MnistModel())
+            client.load_model_dict(model)
+            clients.append(client)
+            client_weights.append(client.get_flattened_parameters())
+            logging.info(f'client{i} loaded')
+        # sanity check, the client models should not be equal
+        if compare_models(clients[0].model, clients[1].model):
+            logging.error('Client models are equal')
+            print('ERROR: Client models are equal and should not be')
+            raise ValueError('Client models are equal')   
+        # average the weights
+        self.server = MnistServer(self.model)
+        self.server.load_client_model(clients[0]) # wow this got out of hand...
+        self.server.load_client_model(clients[1]) # anyway, we load the client models, as clients...
+        avg_weights = self.server.fedavg()
+        self.server.server.set_flattened_parameters(avg_weights)
+        # evaluate the model
+        acc = self.server.server.evaluate()
+        logging.info(f'fed accuracy: {acc}')
+        # save the model
+        filename = f'server_{datetime.now().strftime("%Y%m%d%H%M%S")}.pth'
+        self.server.server.save_model_dict(path=filename)
 # ============================================================================= END agent
 
 if __name__ == '__main__':
@@ -195,6 +223,7 @@ if __name__ == '__main__':
     agent = Agent(seed=int(args.seed))
     agent.set_whoami(args.whoami)
     print(f'{agent.whoami=}')
+    print(f'action: {args.action}')
 
     # start the subprocess (we do this even if we don't need it, consistency)
     # use glob to find the file path first!!! (must be local to this file!!!)
@@ -237,7 +266,11 @@ if __name__ == '__main__':
             if args.time:
                 agent.txrx_at_time(args.time, lambda: agent.receive(who_tx=args.from_who))
     elif args.action == 'federate':
-        pass # federate the models, check if server
+        '''federate the models'''
+        if args.whoami != 'server':
+            logging.error('Only the server can federate the models')
+            exit(1)
+        agent.federate()
     else:
         logging.error(f'Invalid action: {args.action}')
         exit(1)
