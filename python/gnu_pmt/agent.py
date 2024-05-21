@@ -119,6 +119,7 @@ class Agent: # this can be a client_agent or a server_agent
             newest_model = max(glob.iglob(f'{self.whoami}_*.pth'), key=os.path.getctime)
         except ValueError:
             logging.error('No model found')
+            self.stop_subprocess() # stop the subprocess
             raise ValueError('No model found')
         self.client.load_model_dict(newest_model)
         # get the flattened model
@@ -134,6 +135,7 @@ class Agent: # this can be a client_agent or a server_agent
         flat = self.txrx.receive_flattened_model()
         if flat is None:
             logging.error('No model received')
+            self.stop_subprocess() # stop the subprocess
             raise ValueError('No model received')
         self.client.set_flattened_parameters(flat)
         # save the model
@@ -173,6 +175,8 @@ class Agent: # this can be a client_agent or a server_agent
         newest_model1 = max(glob.iglob(f'client1_*.pth'), key=os.path.getctime)
         for i, model in enumerate([newest_model0, newest_model1]):
             if not model:
+                logging.error(f'model{i} not found')
+                self.stop_subprocess() # stop the subprocess
                 raise ValueError(f'model{i} not found')
             logging.info(f'loading model {model}')
             client = MnistClient(MnistModel())
@@ -184,6 +188,7 @@ class Agent: # this can be a client_agent or a server_agent
         if compare_models(clients[0].model, clients[1].model):
             logging.error('Client models are equal')
             print('ERROR: Client models are equal and should not be')
+            self.stop_subprocess() # stop the subprocess
             raise ValueError('Client models are equal')   
         # average the weights
         self.server = MnistServer(self.model)
@@ -236,6 +241,7 @@ if __name__ == '__main__':
         txrx_file = next(glob.iglob(path), None)
         if txrx_file is None:
             logging.error(f'{name} not found @ {path}')
+            agent.stop_subprocess() # stop the subprocess
             raise FileNotFoundError(f'{name} not found at {path}')
     except FileNotFoundError as e:
         logging.error(str(e))
@@ -281,10 +287,12 @@ if __name__ == '__main__':
         '''federate the models'''
         if args.whoami != 'server':
             logging.error('Only the server can federate the models')
+            agent.stop_subprocess() # stop the subprocess
             exit(1)
         agent.federate()
     else:
         logging.error(f'Invalid action: {args.action}')
+        agent.stop_subprocess() # stop the subprocess
         exit(1)
 
     # stop the subprocess
