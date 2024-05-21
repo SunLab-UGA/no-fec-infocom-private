@@ -15,33 +15,34 @@ import threading
 import time
 
 if __name__ == "__main__":
-    #831 = client1
+    #get the int time in milliseconds
+    time_ms = int(time.time() * 1000)
+    print("Time now (in ms):", time_ms)
+    # add an offset to allow for loading the env starting the radio etc
+    time_ms += 7_000 # ms
+    print(f"Start on: +{time_ms}ms")
+
     username = 'sunlab'
-    hostname1 = 'sunlab-831'
+    hostname1 = 'sunlab-831' # client1
     password = 'sunlab'
     conda_env = 'nofec'
     path = '~/no-fec-infocom-private/python/gnu_pmt/'
     python_filename = 'agent.py'
     t1 = threading.Thread(target=run_remote_script, 
                           args=(username, hostname1, password, conda_env, path, python_filename), 
-                          kwargs={'whoami':'client1', 'action':'train'})
+                          kwargs={'whoami':'client1', 'action':'transmit', 'time':time_ms})
 
-    #832 = client0
-    username = 'sunlab'
-    hostname1 = 'sunlab-832'
-    password = 'sunlab'
-    conda_env = 'nofec'
-    path = '~/no-fec-infocom-private/python/gnu_pmt/'
-    python_filename = 'agent.py'
-    t2 = threading.Thread(target=run_remote_script, 
-                          args=(username, hostname1, password, conda_env, path, python_filename), 
-                          kwargs={'whoami':'client0', 'action':'train'})
+    # 830 = server
+    t2 = threading.Thread(target=run_local_script, 
+                          args=(conda_env, path, python_filename), 
+                          kwargs={'whoami':'server', 'action':'receive', 'time':time_ms,
+                                  'from_who':'client1'})
     
 
-    t1.start()
+    # t1.start()
     t2.start()
 
-    t1.join()
+    # t1.join()
     t2.join()
 
     print("All threads finished")

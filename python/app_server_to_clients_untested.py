@@ -10,38 +10,10 @@
 # then it waits for a new saved model from the server
 # (if none it resends the same model at the next sync time)
 
-import subprocess
+
+from run import run_remote_script, run_local_script
 import threading
 import time
-
-def run_remote_script(username, hostname, password, conda_env, 
-                      path, python_filename,  **kwargs):
-    # Convert args tuple to a space-separated string for the command line
-    kwargs_string = ' '.join(f"--{key} {value}" for key, value in kwargs.items())
-    full_command_string = f"{kwargs_string}".strip()
-    print("Command kwargs:", full_command_string)
-
-    command = (
-    f"sshpass -p {password} ssh -o StrictHostKeyChecking=no {username}@{hostname} "
-    f"\"source ~/radioconda/etc/profile.d/conda.sh && conda activate {conda_env} "
-    f"&& date +%s%3N "
-    f"&& cd {path} && python {python_filename} {full_command_string}\""
-    f"&& date +%s%3N"
-    )
-    
-    # Execute the command
-    try:
-        result = subprocess.run(command, shell=True, check=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print("STDOUT:", result.stdout)
-        if result.stderr:
-            print("STDERR:", result.stderr)
-    except subprocess.CalledProcessError as e:
-        print("Error occurred:", e)
-        print("Return Code:", e.returncode)
-        if e.stdout:
-            print("STDOUT:", e.stdout)
-        if e.stderr:
-            print("STDERR:", e.stderr)
 
 if __name__ == "__main__":
     #get the int time in milliseconds
@@ -60,9 +32,7 @@ if __name__ == "__main__":
     t1 = threading.Thread(target=run_remote_script, 
                           args=(username, hostname1, password, conda_env, path, python_filename), 
                           kwargs={'whoami':'client1', 'action':'receive', 'time':time_ms})
-    # run_remote_script(username=username, hostname=hostname1, password=password, conda_env=conda_env,
-    #                   path=path, python_filename=python_filename,
-    #                   whoami='client1', action='train')
+
     #832 = client0
     username = 'sunlab'
     hostname1 = 'sunlab-832'
@@ -74,15 +44,21 @@ if __name__ == "__main__":
                           args=(username, hostname1, password, conda_env, path, python_filename), 
                           kwargs={'whoami':'client0', 'action':'receive', 'time':time_ms})
     
-    # run_remote_script(username=username, hostname=hostname1, password=password, conda_env=conda_env,
-    #                   path=path, python_filename=python_filename,
-    #                   whoami='client0', action='train')
+    # 830 = server
+    conda_env = 'nofec'
+    path = '~/no-fec-infocom-private/python/gnu_pmt/'
+    python_filename = 'agent.py'
+    t3 = threading.Thread(target=run_local_script, 
+                          args=(conda_env, path, python_filename), 
+                          kwargs={'whoami':'server', 'action':'transmit', 'time':time_ms})
 
     t1.start()
     t2.start()
+    t3.start()
 
     t1.join()
     t2.join()
+    t3.join()
 
     print("All threads finished")
     
