@@ -251,6 +251,8 @@ if __name__ == '__main__':
     # temporary testing
     # agent.stop_subprocess()
     # print(f'{agent.check_subprocess()=}')
+    print(f'{agent.check_subprocess()=}')
+    print(f'{agent.subprocess_running=}')
 
     if args.action == 'train':
         logging.info('Training model...')
