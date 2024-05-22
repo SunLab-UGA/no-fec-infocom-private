@@ -161,7 +161,7 @@ class transceiver:
                                  send_times:int = 10, # send multiple times
                                  interval = 4, # interval between sends (ms)
                                  UTC_ms:int = None, # send @ a specific timestamp, if None send now
-                                 prefix:int = 10, # send a fixed number of packets before the model
+                                 prefix:int = 0, # send a fixed number of packets before the model
         ) -> None:
         '''transmit a model as a flattened numpy array'''
         logging.info(f"flattened_parameters shape: {flattened_parameters.shape}")
@@ -173,11 +173,11 @@ class transceiver:
         logging.info(f"num_packets: {num_packets}")
         pkts = np.zeros((num_packets+prefix_length, floats_per_packet),dtype=np.float32) # total packets with prefix
         logging.info(f"pkts shape: {pkts.shape}")
-        # ---prefix
-        prefixes:np.array = generate_floats_from_bits_np(0, prefix) # generate the prefix sequence -> np.array-32bit
-        logging.info(f"prefixes: {prefixes}")
-        for ii,p in enumerate(prefixes):
-            pkts[ii, :] = p
+        # # ---prefix
+        # prefixes:np.array = generate_floats_from_bits_np(0, prefix) # generate the prefix sequence -> np.array-32bit
+        # logging.info(f"prefixes: {prefixes}")
+        # for ii,p in enumerate(prefixes):
+        #     pkts[ii, :] = p
         # ---model
         for i in range(num_packets):
             start = i*floats_per_packet
@@ -257,13 +257,14 @@ class transceiver:
                       packets:int = 1150, # number of packets to receive
                       packet_repeat:int = 10, # number of times to receive the packets
                       floats_per_packet:int = 1528, # number of floats per packet (BPSK) NEED UPDATE!!
-                      prefix:int = 10, # number of packets to sync rx_seq 
+                      prefix:int = 0, # number of packets to sync rx_seq 
         ) -> np.ndarray | None: # return a numpy array or None
         '''receive a model as a flattened numpy array'''
-        total_packets = packets * packet_repeat # model packets
+        total_param_packets = packets * packet_repeat # model packets
+        total_packets = (prefix+packets) * packet_repeat # model packets
         rx_pkt = [] # keep the received packets
         rx_seq = [] ; seq_num=0 # keep the sequence numbers (separate from the packets)
-        for packet in range(total_packets+prefix):
+        for _ in range(total_packets):
             additional_data, data = self.receive_floats(timeout=poll_timeout)
             if data is None:
                 rx_pkt.append(None)
@@ -313,15 +314,15 @@ class transceiver:
         logging.info(f'rx_seq(clean): {rx_seq}')
 
         # remove the preamble from each retransmit so we don't check them for integrity
-        seq_removed_preambles = []
-        pkt_removed_preambles = []
-        for ii in range(0,len(rx_seq), prefix + total_packets):
-            data_start_index = ii + prefix
-            data_end_index = data_start_index + total_packets
-            seq_removed_preambles.extend(rx_seq[data_start_index:data_end_index])
-            pkt_removed_preambles.extend(rx_pkt[data_start_index:data_end_index])
-        # dirty rewrite
-        rx_seq = seq_removed_preambles ; rx_pkt = pkt_removed_preambles
+        # seq_removed_preambles = []
+        # pkt_removed_preambles = []
+        # for ii in range(0,len(rx_seq), prefix + total_param_packets):
+        #     data_start_index = ii + prefix
+        #     data_end_index = data_start_index + total_param_packets
+        #     seq_removed_preambles.extend(rx_seq[data_start_index:data_end_index])
+        #     pkt_removed_preambles.extend(rx_pkt[data_start_index:data_end_index])
+        # # dirty rewrite
+        # rx_seq = seq_removed_preambles ; rx_pkt = pkt_removed_preambles
 
         # check for any missing packets
         dropped_packets_indexes, success_packets_indexes = \
@@ -350,6 +351,10 @@ class transceiver:
         params = rx_params[0:parameter_size] # clip the parameters to the correct size
         params = np.concatenate(params) # flat parameters
         logging.info(f"rx params shape: {params.shape}")
+        #log the first 3 packets and the last 3 packets
+        kk = [0,1,2,-3,-2,-1]
+        for k in kk:
+            logging.info(f"rx_params[{k}]: {rx_params[k]}")        
         return params 
                 
 

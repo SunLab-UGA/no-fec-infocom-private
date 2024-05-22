@@ -1,6 +1,0 @@
-2024-05-21 04:18:21 - Agent started with args=Namespace(whoami='server', action='receive', from_who='client1', time=1716279507339, seed=0)
-2024-05-21 04:18:21 - Random seed set to 0
-2024-05-21 04:18:26 - std_out='MAPPER: encoding: 2\nchunks_to_symbols :info: set_min_output_buffer on block 10 to 207744\nfft_v_fftw :info: set_min_output_buffer on block 12 to 2077440\nofdm_cyclic_prefixer :info: set_min_output_buffer on block 14 to 2077440\nofdm_carrier_allocator_cvc :info: set_min_output_buffer on block 15 to 207744\nchunks_to_symbols :info: set_min_output_buffer on block 16 to 415488\ntagged_stream_mux :info: set_min_output_buffer on block 17 to 207744\n'
-2024-05-21 04:18:26 - err_out='[INFO] [UHD] linux; GNU C++ version 12.3.0; Boost_108400; UHD_4.6.0.HEAD-release\n[INFO] [B200] Loading firmware image: /home/sunlab/radioconda/envs/nofec/share/uhd/images/usrp_b200_fw.hex...\n[INFO] [B200] Detected Device: B200mini\n[INFO] [B200] Loading FPGA image: /home/sunlab/radioconda/envs/nofec/share/uhd/images/usrp_b200mini_fpga.bin...\n'
-2024-05-21 04:18:51 - No model received
-2024-05-21 04:18:51 - Subprocess terminated
