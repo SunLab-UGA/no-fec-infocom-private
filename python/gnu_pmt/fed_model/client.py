@@ -102,7 +102,7 @@ class MnistClient():
         if no model is found, a base model is loaded and None is returned'''
         try:
             # load the most recent model
-            files = sorted(glob.glob('server_model_*.pth'))
+            files = sorted(glob.glob('server_*.pth'))
             if files:
                 latest_model = files[-1]
                 print(f'loading model: {latest_model}')
