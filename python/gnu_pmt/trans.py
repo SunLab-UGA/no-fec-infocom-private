@@ -157,7 +157,7 @@ class transceiver:
     
     def transmit_flattened_model(self, 
                                  flattened_parameters:np.ndarray, #4
-                                 floats_per_packet:int = 375,
+                                 floats_per_packet:int = 375, #250*[1.5,3,6,24]bpsk,qpsk,16qam,64qam
                                  send_times:int = 2, # send multiple times
                                  interval = 4, # interval between sends (ms)
                                  UTC_ms:int = None, # send @ a specific timestamp, if None send now
@@ -256,7 +256,7 @@ class transceiver:
                       parameter_size:int = 431080, # size of the parameters in model
                       packets:int = 1150, # number of packets to receive
                       packet_repeat:int = 2, # number of times to receive the packets
-                      floats_per_packet:int = 1528, # number of floats per packet (BPSK) NEED UPDATE!!
+                      floats_per_packet:int = 375, #1528,
                       prefix:int = 0, # number of packets to sync rx_seq 
         ) -> np.ndarray | None: # return a numpy array or None
         '''receive a model as a flattened numpy array'''
