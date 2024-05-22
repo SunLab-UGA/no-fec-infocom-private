@@ -158,7 +158,7 @@ class transceiver:
     def transmit_flattened_model(self, 
                                  flattened_parameters:np.ndarray, #4
                                  floats_per_packet:int = 375,
-                                 send_times:int = 10, # send multiple times
+                                 send_times:int = 1, # send multiple times
                                  interval = 4, # interval between sends (ms)
                                  UTC_ms:int = None, # send @ a specific timestamp, if None send now
                                  prefix:int = 0, # send a fixed number of packets before the model
@@ -255,16 +255,18 @@ class transceiver:
                       poll_timeout:int = 2,
                       parameter_size:int = 431080, # size of the parameters in model
                       packets:int = 1150, # number of packets to receive
-                      packet_repeat:int = 10, # number of times to receive the packets
+                      packet_repeat:int = 1, # number of times to receive the packets
                       floats_per_packet:int = 1528, # number of floats per packet (BPSK) NEED UPDATE!!
                       prefix:int = 0, # number of packets to sync rx_seq 
         ) -> np.ndarray | None: # return a numpy array or None
         '''receive a model as a flattened numpy array'''
-        total_param_packets = packets * packet_repeat # model packets
+        rx_timeout = int(packets * packet_repeat * 2 * 1.1) # timeout for receiving all packets
         total_packets = (prefix+packets) * packet_repeat # model packets
+        logging.info(f"looking for total_packets: {total_packets}")
+        logging.info(f"rx_timeout: {rx_timeout}")
         rx_pkt = [] # keep the received packets
         rx_seq = [] ; seq_num=0 # keep the sequence numbers (separate from the packets)
-        for _ in range(total_packets):
+        for _ in range(rx_timeout):
             additional_data, data = self.receive_floats(timeout=poll_timeout)
             if data is None:
                 rx_pkt.append(None)
@@ -311,7 +313,9 @@ class transceiver:
         # new stratagy, assume no dropped packets... remove None, warn if invalid packets
         rx_seq = [x for x in rx_seq if x != "None"]
         rx_pkt = [x for x in rx_pkt if x is not None]
-        logging.info(f'rx_seq(clean): {rx_seq}')
+        # logging.info(f'rx_seq(clean): {rx_seq}')
+        logging.info(f'cleaned len(rx_seq): {len(rx_seq)}')
+        logging.info(f'cleaned len(rx_pkt): {len(rx_pkt)}')
 
         # remove the preamble from each retransmit so we don't check them for integrity
         # seq_removed_preambles = []
@@ -324,30 +328,31 @@ class transceiver:
         # # dirty rewrite
         # rx_seq = seq_removed_preambles ; rx_pkt = pkt_removed_preambles
 
-        # check for any missing packets
-        dropped_packets_indexes, success_packets_indexes = \
-                    self._compare_string_indices_divided(rx_seq, packet_repeat)
+        # # check for any missing packets
+        # dropped_packets_indexes, success_packets_indexes = \
+        #             self._compare_string_indices_divided(rx_seq, packet_repeat)
 
-        if len(dropped_packets_indexes) > 0:
-            logging.info(f"CANNOT RECONSTRUCT MODEL: {len(dropped_packets_indexes)} packets dropped")
-            logging.info(f"success packets: {len(success_packets_indexes)}")
-            return None
-        logging.debug(f"Dropped packet at index: {dropped_packets_indexes}")
-        logging.debug(f'len(rx_seq): {len(rx_seq)}')
+        # if len(dropped_packets_indexes) > 0:
+        #     logging.info(f"CANNOT RECONSTRUCT MODEL: {len(dropped_packets_indexes)} packets dropped")
+        #     logging.info(f"success packets: {len(success_packets_indexes)}")
+        #     return None
+        # logging.debug(f"Dropped packet at index: {dropped_packets_indexes}")
+        # logging.debug(f'len(rx_seq): {len(rx_seq)}')
 
-        # construct the flattened model to return
-        logging.info(f"success packets: {len(success_packets_indexes)}")
-        logging.info(f"RX SUCCESS: all required packets received")
-        index_list = []
-        for i in range(len(success_packets_indexes)):
-            # find the index of the success packet
-            search_for_index = success_packets_indexes[i]
-            # find the lowest index of the success packet in the rx_seq
-            index = rx_seq.index(search_for_index)
-            index_list.append(index)
-        success_packets = [rx_pkt[i] for i in index_list] # get the success packets
+        # # construct the flattened model to return
+        # logging.info(f"success packets: {len(success_packets_indexes)}")
+        # logging.info(f"RX SUCCESS: all required packets received")
+        # index_list = []
+        # for i in range(len(success_packets_indexes)):
+        #     # find the index of the success packet
+        #     search_for_index = success_packets_indexes[i]
+        #     # find the lowest index of the success packet in the rx_seq
+        #     index = rx_seq.index(search_for_index)
+        #     index_list.append(index)
+        # success_packets = [rx_pkt[i] for i in index_list] # get the success packets
         # convert the packets to a numpy array
-        rx_params = [self._parse_rx_pkt(pkt) for pkt in success_packets]
+        # rx_params = [self._parse_rx_pkt(pkt) for pkt in success_packets]
+        rx_params = [self._parse_rx_pkt(pkt) for pkt in rx_pkt]
         params = rx_params[0:parameter_size] # clip the parameters to the correct size
         params = np.concatenate(params) # flat parameters
         logging.info(f"rx params shape: {params.shape}")
