@@ -1,3 +1,7 @@
 logs/
 .vscode/
 old/
+__pycache__/
+*.pyc
+*.log
+*.pth

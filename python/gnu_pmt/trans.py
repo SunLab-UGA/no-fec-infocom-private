@@ -291,6 +291,9 @@ class transceiver:
                     offset = i - preamble_index # number to add to the front to align the seq numbers
                     break # found a valid index preamble to adjust the sequence
         if preamble_index == None:
+            logging.info(f"CANNOT RECONSTRUCT MODEL: preamble not found in prefix packets")
+            #dump the rx_seq and rx_pkt for debugging
+            logging.info(f'rx_seq: {rx_seq}')
             return None # we didn't find any sequence numbers in any prefix packets!
         else:
             # adjust the seq numbers based on the preamble index
