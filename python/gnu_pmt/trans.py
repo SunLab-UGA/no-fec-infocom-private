@@ -354,8 +354,10 @@ class transceiver:
         # convert the packets to a numpy array
         # rx_params = [self._parse_rx_pkt(pkt) for pkt in success_packets]
         rx_params = [self._parse_rx_pkt(pkt) for pkt in rx_pkt]
-        params = rx_params[0:parameter_size] # clip the parameters to the correct size
-        params = np.concatenate(params) # flat parameters
+        logging.info(f"rx_params shape: {len(rx_params)}")
+        # params = rx_params[0:parameter_size] # clip the parameters to the correct size
+        params = np.concatenate(rx_params) # flat parameters
+        params = params[:parameter_size] # clip the parameters to the correct size
         logging.info(f"rx params shape: {params.shape}")
         if len(params) != parameter_size:
             logging.error(f"ERROR: received parameters length is not correct! {len(params)}")
