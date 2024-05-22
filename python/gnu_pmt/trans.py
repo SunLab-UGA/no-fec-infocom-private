@@ -348,7 +348,9 @@ class transceiver:
         # convert the packets to a numpy array
         rx_params = [self._parse_rx_pkt(pkt) for pkt in success_packets]
         params = rx_params[0:parameter_size] # clip the parameters to the correct size
-        return np.concatenate(params) # return the concatenated flat parameters
+        params = np.concatenate(params) # flat parameters
+        logging.info(f"rx params shape: {params.shape}")
+        return params 
                 
 
 # =============================================================================================== MAIN    

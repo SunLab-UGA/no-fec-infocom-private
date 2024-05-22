@@ -6,7 +6,7 @@
 #
 # GNU Radio Python Flow Graph
 # Title: Wifi Transceiver Nogui
-# GNU Radio version: 3.10.9.2
+# GNU Radio version: 3.10.10.0
 
 import os
 import sys
@@ -45,7 +45,7 @@ class wifi_transceiver_nogui(gr.top_block):
         self.lo_offset = lo_offset = 0
         self.interval = interval = 5000
         self.freq = freq = 5.86e9
-        self.encoding = encoding = 2
+        self.encoding = encoding = 0
         self.chan_est = chan_est = 0
 
         ##################################################
