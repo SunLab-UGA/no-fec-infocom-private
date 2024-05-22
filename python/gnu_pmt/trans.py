@@ -295,7 +295,8 @@ class transceiver:
             #dump the rx_seq and rx_pkt for debugging
             logging.info(f'rx_seq: {rx_seq}')
             for ii,rx in enumerate(rx_pkt):
-                if rx is not None and ii < 100: # print the first 20 packets if valid
+                if rx is not None and ii < 100: # print the first 100 packets if valid
+                    np.set_printoptions(threshold=np.inf, linewidth=np.inf) # get the full array, limited to just 100 pkts, careful very large
                     logging.info(f'rx_pkt[{ii}]: {rx}')
             return None # we didn't find any sequence numbers in any prefix packets!
         else:
