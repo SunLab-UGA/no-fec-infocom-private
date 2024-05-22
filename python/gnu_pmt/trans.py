@@ -175,10 +175,9 @@ class transceiver:
         logging.info(f"pkts shape: {pkts.shape}")
         # ---prefix
         prefixes:np.array = generate_floats_from_bits_np(0, prefix) # generate the prefix sequence -> np.array-32bit
-        for p in prefixes:
-            for ii in range(floats_per_packet):
-                pkts[ii, :] = p # fill the prefix packets with the prefix sequence
-        #log the first 10 packets
+        logging.info(f"prefixes: {prefixes}")
+        for ii,p in enumerate(prefixes):
+            pkts[ii, :] = p
         # ---model
         for i in range(num_packets):
             start = i*floats_per_packet

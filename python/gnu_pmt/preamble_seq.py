@@ -42,3 +42,6 @@ if __name__ == "__main__":
     count = 10
     float_sequence = generate_floats_from_bits(start, count)
     print(float_sequence)
+
+    float_sequence = generate_floats_from_bits_np(start, count)
+    print(float_sequence)
