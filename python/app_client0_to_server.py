@@ -19,24 +19,24 @@ if __name__ == "__main__":
     time_ms = int(time.time() * 1000)
     print("Time now (in ms):", time_ms)
     # add an offset to allow for loading the env starting the radio etc
-    time_ms += 7_000 # ms
+    time_ms += 8_000 # ms
     print(f"Start on: +{time_ms}ms")
 
     username = 'sunlab'
-    hostname1 = 'sunlab-832' # client1
+    hostname1 = 'sunlab-832' # client0
     password = 'sunlab'
     conda_env = 'nofec'
     path = '~/no-fec-infocom-private/python/gnu_pmt/'
     python_filename = 'agent.py'
     t1 = threading.Thread(target=run_remote_script, 
                           args=(username, hostname1, password, conda_env, path, python_filename), 
-                          kwargs={'whoami':'client2', 'action':'transmit', 'time':time_ms})
+                          kwargs={'whoami':'client0', 'action':'transmit', 'time':time_ms+50}) # +ms delay
 
     # 830 = server
     t2 = threading.Thread(target=run_local_script, 
                           args=(conda_env, path, python_filename), 
                           kwargs={'whoami':'server', 'action':'receive', 'time':time_ms,
-                                  'from_who':'client1'})
+                                  'from_who':'client0'})
     
 
     t1.start()

@@ -158,7 +158,7 @@ class transceiver:
     def transmit_flattened_model(self, 
                                  flattened_parameters:np.ndarray, #4
                                  floats_per_packet:int = 375,
-                                 send_times:int = 1, # send multiple times
+                                 send_times:int = 2, # send multiple times
                                  interval = 4, # interval between sends (ms)
                                  UTC_ms:int = None, # send @ a specific timestamp, if None send now
                                  prefix:int = 0, # send a fixed number of packets before the model
@@ -255,7 +255,7 @@ class transceiver:
                       poll_timeout:int = 2,
                       parameter_size:int = 431080, # size of the parameters in model
                       packets:int = 1150, # number of packets to receive
-                      packet_repeat:int = 1, # number of times to receive the packets
+                      packet_repeat:int = 2, # number of times to receive the packets
                       floats_per_packet:int = 1528, # number of floats per packet (BPSK) NEED UPDATE!!
                       prefix:int = 0, # number of packets to sync rx_seq 
         ) -> np.ndarray | None: # return a numpy array or None
