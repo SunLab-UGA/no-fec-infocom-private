@@ -279,7 +279,7 @@ class transceiver:
                     rx_seq.append(seq_num) ; seq_num += 1 # assign seq num
 
         # align the packets to the correct sequence (inspect the first len(rx_seq)=prefix packets)
-        pramble_seq = generate_floats_from_bits(0, prefix)
+        pramble_seq = generate_floats_from_bits_np(0, prefix)
         preamble_index = None
         for i in range(prefix):
             if type(rx_seq[i]) == int: # valid packet
