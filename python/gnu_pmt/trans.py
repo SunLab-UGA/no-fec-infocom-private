@@ -262,7 +262,8 @@ class transceiver:
         '''receive a model as a flattened numpy array'''
         rx_timeout = int(packets * packet_repeat * 2 * 1.1) # timeout for receiving all packets
         total_packets = (prefix+packets) * packet_repeat # model packets
-        logging.info(f"looking for total_packets: {total_packets}")
+        logging.info(f"looking for {packets} packets total")
+        logging.info(f"tx sending: {total_packets} packets")
         logging.info(f"rx_timeout: {rx_timeout}")
         rx_pkt = [] # keep the received packets
         rx_seq = [] ; seq_num=0 # keep the sequence numbers (separate from the packets)
