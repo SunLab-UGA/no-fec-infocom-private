@@ -183,7 +183,6 @@ class transceiver:
             start = i*floats_per_packet
             end = (i+1)*floats_per_packet
             pkts[i+prefix, :len(flattened_parameters[start:end])] = flattened_parameters[start:end]
-        logging.info(f'final pkts shape: {pkts.shape}')
         logging.info(f"pkts[0]: {pkts[0]}") # log the first packet
         logging.info(f"pkts[1]: {pkts[1]}") # log the second packet
         logging.info(f"pkts[9]: {pkts[9]}") # log the third packet
@@ -278,45 +277,40 @@ class transceiver:
                 else: # assume a valid packet
                     rx_pkt.append(data)
                     rx_seq.append(seq_num) ; seq_num += 1 # assign seq num
-        logging.info(f'rx_seq: {rx_seq}')
-        # # align the packets to the correct sequence (inspect the first len(rx_seq)=prefix packets)
-        # pramble_seq = generate_floats_from_bits_np(0, prefix)
-        # preamble_index = None
-        # for i in range(prefix):
-        #     if type(rx_seq[i]) == int: # valid packet
-        #         # parse the packet
-        #         checkme = self._parse_rx_pkt(rx_pkt[i])
-        #         # check if the preamble sequence is present in the packet, if so return the index
-        #         preamble_index = check_preamble(pramble_seq, checkme)
-        #         if preamble_index is not None:
-        #             offset = i - preamble_index # number to add to the front to align the seq numbers
-        #             break # found a valid index preamble to adjust the sequence
-        # if preamble_index == None:
-        #     logging.info(f"CANNOT RECONSTRUCT MODEL: preamble not found in prefix packets")
-        #     #dump the rx_seq and rx_pkt for debugging
-        #     logging.info(f'rx_seq: {rx_seq}')
-        #     np.set_printoptions(threshold=np.inf, linewidth=np.inf) # get the full array, limited to just 100 pkts, careful very large
-        #     for ii,rx in enumerate(rx_pkt):
-        #         if rx is not None and ii < 100: # print the first 100 packets if valid
-        #             logging.info(f'rx_pkt[{ii}]: {rx}')
-        #     return None # we didn't find any sequence numbers in any prefix packets!
-        # else:
-        #     # adjust the seq numbers based on the preamble index
-        #     if offset < 0: # sanity check
-        #         raise ValueError("packet offset sync was negative")
-        #     rx_seq = ["None"] * offset + rx_seq
-        #     rx_pkt = [None] * offset + rx_pkt
 
-        # new stratagy, assume no dropped packets... remove None, warn if invalid packets
-        rx_seq = [x for x in rx_seq if x != "None"]
-        rx_pkt = [x for x in rx_pkt if x is not None]
-        logging.info(f'rx_seq(clean): {rx_seq}')
+        # align the packets to the correct sequence (inspect the first len(rx_seq)=prefix packets)
+        pramble_seq = generate_floats_from_bits_np(0, prefix)
+        preamble_index = None
+        for i in range(prefix):
+            if type(rx_seq[i]) == int: # valid packet
+                # parse the packet
+                checkme = self._parse_rx_pkt(rx_pkt[i])
+                # check if the preamble sequence is present in the packet, if so return the index
+                preamble_index = check_preamble(pramble_seq, checkme)
+                if preamble_index is not None:
+                    offset = i - preamble_index # number to add to the front to align the seq numbers
+                    break # found a valid index preamble to adjust the sequence
+        if preamble_index == None:
+            logging.info(f"CANNOT RECONSTRUCT MODEL: preamble not found in prefix packets")
+            #dump the rx_seq and rx_pkt for debugging
+            logging.info(f'rx_seq: {rx_seq}')
+            np.set_printoptions(threshold=np.inf, linewidth=np.inf) # get the full array, limited to just 100 pkts, careful very large
+            for ii,rx in enumerate(rx_pkt):
+                if rx is not None and ii < 100: # print the first 100 packets if valid
+                    logging.info(f'rx_pkt[{ii}]: {rx}')
+            return None # we didn't find any sequence numbers in any prefix packets!
+        else:
+            # adjust the seq numbers based on the preamble index
+            if offset < 0: # sanity check
+                raise ValueError("packet offset sync was negative")
+            rx_seq = ["None"] * offset + rx_seq
+            rx_pkt = [None] * offset + rx_pkt
 
         # remove the preamble from each retransmit so we don't check them for integrity
         seq_removed_preambles = []
         pkt_removed_preambles = []
         for ii in range(0,len(rx_seq), prefix + total_packets):
-            data_start_index = ii + prefix
+            data_start_index = i + prefix
             data_end_index = data_start_index + total_packets
             seq_removed_preambles.extend(rx_seq[data_start_index:data_end_index])
             pkt_removed_preambles.extend(rx_pkt[data_start_index:data_end_index])
