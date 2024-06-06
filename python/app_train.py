@@ -24,7 +24,7 @@ if __name__ == "__main__":
     python_filename = 'agent.py'
     t1 = threading.Thread(target=run_remote_script, 
                           args=(username, hostname1, password, conda_env, path, python_filename), 
-                          kwargs={'whoami':'client1', 'action':'train'})
+                          kwargs={'whoami':'client1', 'action':'train', 'seed':42})
 
     #832 = client0
     username = 'sunlab'
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     python_filename = 'agent.py'
     t2 = threading.Thread(target=run_remote_script, 
                           args=(username, hostname1, password, conda_env, path, python_filename), 
-                          kwargs={'whoami':'client0', 'action':'train'})
+                          kwargs={'whoami':'client0', 'action':'train', 'seed':138})
     
 
     t1.start()
