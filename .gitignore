@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 *.log
 *.pth
+data*/
+collect_data.sh
+clear_data.sh
