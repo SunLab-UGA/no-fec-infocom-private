@@ -39,6 +39,18 @@ cmake --build . --target install
     * symbol-mod (gr-ieee802-11-maint-3.10-_Symbol_MOD)
 
 
+---
+
+With everything installed we can now run the top level apps or a full federated training
+* app_train, trains both clients on a subset of data and saves them as "client0" or "client1" model on that computer (the first run has no "server" model, so random weights are loaded)
+* app_client0_to_server and app_client1_to_server send the weights and save them on the server
+* app_server_federate does the federation of the weights (fed_avg)
+* app_server_to_clients broadcast the new weights to the clients, both save the weights as a "server" model
+
+* federate.py automatically runs the five scripts in a loop
+* federate_with_checks automatically runs with error checking and accuracy checking
+
+
 TODO:
 fill out more instructions on the python control and analysis
 

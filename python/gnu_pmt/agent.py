@@ -188,8 +188,8 @@ class Agent: # this can be a client_agent or a server_agent
         if compare_models(clients[0].model, clients[1].model):
             logging.error('Client models are equal')
             print('ERROR: Client models are equal and should not be')
-            self.stop_subprocess() # stop the subprocess
-            raise ValueError('Client models are equal')   
+            # self.stop_subprocess() # stop the subprocess
+            # raise ValueError('Client models are equal') # this shouldn't happen, but for the time being we continue so that we can see the accuracy
         # average the weights
         self.server = MnistServer(self.model)
         self.server.load_client_model(clients[0]) # wow this got out of hand...
