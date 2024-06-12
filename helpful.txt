@@ -42,4 +42,4 @@ git push
 
 #port suck open?
 lsof -i :50011
-kill -9 PID
+kill -9 [PID given above]

@@ -83,7 +83,7 @@ if __name__ == "__main__":
     # Run each script in the list sequentially with a timeout
     for round in range(federated_rounds):
         # print(f"Round {round + 1} of {federated_rounds}")
-        logging.info(f"Round {round + 1} of {federated_rounds}")
+        logging.info(f"=== Round {round + 1} of {federated_rounds} ===")
         
         for script in scripts:
             return_status = run_script_with_timeout(script, timeout_seconds)
@@ -92,7 +92,7 @@ if __name__ == "__main__":
             if return_status is None: # the script failed to start or complete
                 # print(f"Failed to run {script}")
                 logging.warning(f"Failed to run {script}")
-                exit(1)
+                exit(1) # exit with run failure code
             
             # Get the most recent log file (app_train will have no log file on the server side) (otherwise, just check the most recent log file for errors)
             path = os.path.expanduser("~/no-fec-infocom-private/python/gnu_pmt/*.log") # path to log files
@@ -112,8 +112,16 @@ if __name__ == "__main__":
                             # print(line)
                             logging.info("FEDERATED ACCURACY:")
                             logging.info(line)
-                            break
-            
+                            # parse the accuracy into a float
+                            match = re.search(r"([-+]?\d*\.\d+([eE][-+]?\d+)?|\d+)", line[19:]) # regex to find the first float in the line removing the date
+                            if match:
+                                accuracy = float(match.group())
+                                logging.info(f"Accuracy: {accuracy}")
+                                if accuracy < 0.126: # accuracy threshold
+                                    logging.warning("ERROR: Accuracy is less than 0.05")
+                                    print("Exiting...")
+                                    exit(2+int(round)) # exit the script, indicate accuracy is too low (2+round to indicate which round failed)
+       
             # check if the log indicates a known failure mode and exit
             if log_file is not None:
                 with open(log_file, "r") as f:
@@ -124,11 +132,13 @@ if __name__ == "__main__":
                             logging.warning("ERROR FOUND IN LOG FILE!")
                             logging.warning(line)
                             print("Exiting...")
-                            exit(1)
+                            exit(1) # exit the script, indicate an error was found and further handling is needed
 
             # Sleep between scripts
-            sleep_time = 2 # seconds
+            sleep_time = 1 # seconds
             # print(f"Sleeping for {sleep_time} seconds")
             logging.info(f"Sleeping for {sleep_time} seconds")
             time.sleep(sleep_time)
-
+    
+    logging.info("Trial Completed")
+    exit(0) # exit the script, indicate the trial completed successfully

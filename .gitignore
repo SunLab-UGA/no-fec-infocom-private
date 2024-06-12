@@ -8,3 +8,4 @@ __pycache__/
 data*/
 collect_data.sh
 clear_data.sh
+*.auto_log
