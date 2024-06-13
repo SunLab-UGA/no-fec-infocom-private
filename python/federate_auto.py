@@ -95,6 +95,9 @@ logging.getLogger('').addHandler(console)
 logging.info("Starting Federated Learning AUTO")
 
 for round in range(run_limit): # run until a full run is completed successfully or the run limit is reached
+    print("")
+    print("=====================================================================")
+    print(time.strftime("%Y-%m-%d %H:%M:%S")) # print the time, no need to log
 
     logging.info(f"=== Trial {round} ===")
     logging.info(f"Running {python_script}...")
@@ -104,8 +107,9 @@ for round in range(run_limit): # run until a full run is completed successfully 
     if result == 0: # success
         logging.info("Trial Completed")
         logging.info("Collecting logs...")
-        sh_result = subprocess.run([collect_script, "clear"], shell=True, check=True, text=True, capture_output=True)
-        logging.info(f"{collect_script}, exit status {sh_result.returncode}")
+        cmd = f"{collect_script} clear" # collect and clear the logs
+        sh_result = subprocess.run([cmd], shell=True, check=True, text=True, capture_output=True)
+        logging.info(f"{cmd}, exit status {sh_result.returncode}")
         break # exit
 
     elif result == 1: # failed (extra handling required, keep logs and retry)
@@ -115,7 +119,7 @@ for round in range(run_limit): # run until a full run is completed successfully 
         try:
             cmd = f"{close_script} 50011" # 50011 is the port number that gets stuck open if a script reports an error
             result = subprocess.run([cmd], shell=True, check=True, text=True, capture_output=True) 
-            logging.info(f"{clear_script}, exit status {result.returncode}")
+            logging.info(f"{cmd}, exit status {result.returncode}")
         except subprocess.CalledProcessError as e:
             if e.returncode == 1:
                 logging.info(f"Error: {close_script} exited with status {e.returncode}")
@@ -124,21 +128,24 @@ for round in range(run_limit): # run until a full run is completed successfully 
                 logging.info(f"Error: {close_script} exited with status {e.returncode}")
 
         logging.info("keeping logs")
-        sh_result = subprocess.run([collect_script, "clear"], shell=True, check=True, text=True, capture_output=True)
-        logging.info(f"{collect_script}, exit status {sh_result.returncode}")
+        cmd = f"{collect_script} clear" # collect and clear the logs
+        sh_result = subprocess.run([cmd], shell=True, check=True, text=True, capture_output=True)
+        logging.info(f"{cmd}, exit status {sh_result.returncode}")
         logging.info("Waiting 10 Seconds...") if DEBUG_SLOW_MODE else None; time.sleep(10) if DEBUG_SLOW_MODE else None
 
     elif result >= 2: # failed ( 2 + itterations completed), do log management and retry
         logging.info("Trial Failed")
         if result >= 4: # keep the logs
             logging.info("keeping logs")
-            sh_result = subprocess.run([collect_script, "clear"], shell=True, check=True, text=True, capture_output=True)
-            logging.info(f"{collect_script}, exit status {sh_result.returncode}")
+            cmd = f"{collect_script} clear" # collect and clear the logs
+            sh_result = subprocess.run([cmd], shell=True, check=True, text=True, capture_output=True)
+            logging.info(f"{cmd}, exit status {sh_result.returncode}")
             logging.info("Waiting 10 Seconds...") if DEBUG_SLOW_MODE else None; time.sleep(10) if DEBUG_SLOW_MODE else None
         else: # clear the logs
             logging.info("clearing logs")
-            sh_result = subprocess.run([clear_script], shell=True, check=True, text=True, capture_output=True)
-            logging.info(f"{clear_script}, exit status {sh_result.returncode}")
+            cmd = f"{collect_script} clear" # collect and clear the logs
+            sh_result = subprocess.run([cmd], shell=True, check=True, text=True, capture_output=True)
+            logging.info(f"{cmd}, exit status {sh_result.returncode}")
             logging.info("Waiting 10 Seconds...") if DEBUG_SLOW_MODE else None; time.sleep(10) if DEBUG_SLOW_MODE else None
             
     else:

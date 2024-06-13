@@ -283,7 +283,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '0.75'
+    value: '0.85'
   states:
     bus_sink: false
     bus_source: false
@@ -337,7 +337,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '0.75'
+    value: '0.85'
   states:
     bus_sink: false
     bus_source: false

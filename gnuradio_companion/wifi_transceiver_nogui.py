@@ -38,9 +38,9 @@ class wifi_transceiver_nogui(gr.top_block):
         ##################################################
         # Variables
         ##################################################
-        self.tx_gain = tx_gain = 0.75
+        self.tx_gain = tx_gain = 0.85
         self.samp_rate = samp_rate = 10e6
-        self.rx_gain = rx_gain = 0.75
+        self.rx_gain = rx_gain = 0.85
         self.pdu_length = pdu_length = 375
         self.lo_offset = lo_offset = 0
         self.interval = interval = 5000
