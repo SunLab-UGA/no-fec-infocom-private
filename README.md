@@ -47,9 +47,14 @@ With everything installed we can now run the top level apps or a full federated 
 * app_server_federate does the federation of the weights (fed_avg)
 * app_server_to_clients broadcast the new weights to the clients, both save the weights as a "server" model
 
-* federate.py automatically runs the five scripts in a loop
-* federate_with_checks automatically runs with error checking and accuracy checking
+## Automation
+* [federate.py automatically runs the five scripts in a loop]
+* [federate_with_checks.py automatically runs with error checking and accuracy checking]
+* federate_with_checks_logging.py automatically runs with error checking, accuracy checking and logging  
+---
+* federate_auto.py runs "federate_with_checks_logging.py" many times and keeps or clears the logs based on the success or failure of the trial
 
+---
 
 TODO:
 fill out more instructions on the python control and analysis
@@ -63,3 +68,5 @@ Persistent
 echo 'kernel.shmmax=2147483648' | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 ```
+
+Add ssh setup and ntp setup instructions
