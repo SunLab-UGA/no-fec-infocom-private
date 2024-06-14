@@ -35,12 +35,13 @@ class transceiver:
         else:
             return False
 
-    def _decode_PMT(self, data:dict) -> tuple:
+    def _decode_PMT(self, data:bytes) -> tuple:
         '''Decode the data tuple from a PMT message
             data should be a tuple of (dict, np.array)'''
         try:
-            data = pmt.deserialize_str(data) # deserialize the data
-            data = pmt.to_python(data) # convert the data to a python object
+            # data = pmt.deserialize_str(data) # deserialize the data
+            # data = pmt.to_python(data) # convert the data to a python object
+            data = pmt.to_python(data)
         except Exception as e:
             print(f"ERROR: could not decode PMT message: {e}") if VERBOSE else None
             logging.error(f"ERROR: could not decode PMT message: {e}")
