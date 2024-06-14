@@ -5,8 +5,6 @@
 # lsof -i :50011
 # kill -9 [PID given above]
 
-# UNTESTED!!!
-
 
 # Check if a port number is provided
 if [ -z "$1" ]
